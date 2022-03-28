@@ -1,12 +1,11 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 import {Card,Button,Form} from 'react-bootstrap'
-import Dashboard from '../Dashboard/Dashboard';
 import './signup.css'
-import Web3 from 'web3'
+import web3 from '../../utils/web3'
+
 
 var randomWords = require('random-words');
-
-const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
 
 
 function SignUp() {
@@ -17,6 +16,8 @@ function SignUp() {
   const [phrase , setphrase] = React.useState([])
   const [inputPhrase,setInputPhrase] = React.useState('')
 
+
+  const navigate = useNavigate();
 
   const createPassword = () =>{
     if(password !== confirmPassword){
@@ -29,20 +30,23 @@ function SignUp() {
 
   const createWallet = () => {
     const userInput = inputPhrase.split(' ')
-    console.log(phrase)
-    console.log(userInput)
     if(JSON.stringify(userInput) !== JSON.stringify(phrase)){
       alert('Incorrect phrase')
     }else{
-        renderDashBoard()
+      web3.eth.accounts.wallet.create(1,JSON.stringify(phrase));
+      web3.eth.accounts.wallet.encrypt(password);
+      web3.eth.accounts.wallet.save(password); //Stores the keystore in local storage
+      loadWallet()
     }
   }
 
+  const loadWallet = () => {
+    web3.eth.accounts.wallet.load(password);
+    renderDashBoard()
+  }
+
   const renderDashBoard = () => {
-    web3.eth.accounts.create();
-    return(
-      <Dashboard/>
-    )
+    navigate('/dashboard')
   }
 
 
@@ -63,7 +67,7 @@ function SignUp() {
     <Card className='text-center card-ctn'>
     <Card.Body>
     <Card.Title>Create a Password</Card.Title>
-    <Form onSubmit={createPassword}>
+    <Form>
    <Form.Group className="mb-3" controlId="formBasicPassword">
     <Form.Label>New Password</Form.Label>
     <Form.Control type="password" placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)}/>
@@ -72,7 +76,7 @@ function SignUp() {
     <Form.Label>Confirm password</Form.Label>
     <Form.Control type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)}/>
   </Form.Group>
-  <Button variant="primary" type="submit">
+  <Button variant="primary" onClick = {createPassword}>
     Next
   </Button>
 </Form>
@@ -107,19 +111,18 @@ function SignUp() {
     <Card className='text-center card-ctn'>
     <Card.Body>
     <Card.Title>Confirm the Recovery Phrase</Card.Title>
-    <Form onSubmit={createWallet}>
+    <Form>
    <Form.Group className="mb-3">
     <Form.Label>Enter your secret recovery phrase</Form.Label>
     <Form.Control type="text" placeholder="Recovery Phrase" value={inputPhrase} onChange={(e)=>{setInputPhrase(e.target.value)}}/>
   </Form.Group>
-  <Button variant="primary" type="submit">
+  <Button variant="primary" onClick={createWallet}>
     Confirm and Create Wallet
   </Button>
 </Form>
   </Card.Body>
 </Card>
     </div>}
-
     </div>
   )
 }
@@ -128,9 +131,4 @@ export default SignUp
 
 
 //Signup Workflow
-//1. Create a Password
-//2. Create a phrase
-//3. Confirm the phrase
-//Generate a etherum account and private key
-//Store the accounts locally on system
 //Handle Authentication for accessing the dashboard
