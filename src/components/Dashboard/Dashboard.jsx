@@ -11,6 +11,12 @@ function Dashboard() {
   const [balanceAVAX, setBalanceAVAX] = useState('');
   const [balanceETH, setBalanceETH] = useState('');
   const [showSplitBalance, setShowSplitBalance] = useState(false);
+  const [wallet, setWallet] = React.useState(null);
+
+
+  React.useEffect(() => {
+    setWallet(web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet'));
+  }, [])
 
   //creating context to be used by signUp
   const [network, setNetwork] = useContext(NetworkContext);

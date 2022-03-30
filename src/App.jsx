@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react'
 import './App.css';
 import React, { useEffect, createContext } from 'react'
 import { Routes, Route, Link } from "react-router-dom";
@@ -9,6 +10,9 @@ import { Card, Button, Form } from 'react-bootstrap'
 
 function App() {
 
+  const [wallet, setWallet] = useState(localStorage.getItem('user-wallet'));
+  const [authed, setAuthed] = useState(false);
+
   // RPC of chains
   const fujiRPC = "https://api.avax-test.network/ext/bc/C/rpc";
   const ropstenRPC = "https://ropsten.infura.io/v3/";
@@ -18,6 +22,12 @@ function App() {
   const private_key = "0x152f8df1657e3aede6b1a079d479bdc2f71da3558a10b123bd76acbb7caeb170";
   //setting chains
   const [networks, setNetworks] = React.useState('');
+
+  useEffect(() => {
+    if (wallet) {
+      setAuthed(true);
+    }
+  }, [wallet])
 
   // useEffect(() => {
   const handleContext = () => {
@@ -60,9 +70,11 @@ function App() {
       <Button variant="primary" onClick={handleContext} >Get context</Button>
       <NetworkContext.Provider value={networks}>
         <Routes>
-          <Route path="/" element={<Signup />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          {console.log(authed)}
+          <Route path='/' element={authed ? <Login /> : <Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
+
       </NetworkContext.Provider>
     </div>
   );

@@ -9,10 +9,10 @@ var randomWords = require('random-words');
 
 function SignUp() {
 
-  const [currentScreen, setCurrentScreen] = React.useState(1);
   const [password, setPassword] = React.useState('')
+  const [phrase, setPhrase] = React.useState([])
+  const [currentScreen, setCurrentScreen] = React.useState(1);
   const [confirmPassword, setConfirmPassword] = React.useState('')
-  const [phrase, setphrase] = React.useState([])
   const [inputPhrase, setInputPhrase] = React.useState('')
 
 
@@ -23,8 +23,10 @@ function SignUp() {
     if (password !== confirmPassword) {
       alert('Password does not match')
     } else {
+      localStorage.setItem('password', password)
       setCurrentScreen(currentScreen + 1)
-      setphrase(randomWords(10))
+      setPhrase(randomWords(12))
+      localStorage.setItem('phrase', JSON.stringify(phrase))
     }
   }
 
@@ -34,15 +36,9 @@ function SignUp() {
       alert('Incorrect phrase')
     } else {
       web3.eth.accounts.wallet.create(1, JSON.stringify(phrase));
-      web3.eth.accounts.wallet.encrypt(password);
-      web3.eth.accounts.wallet.save(password); //Stores the keystore in local storage
-      loadWallet()
+      web3.eth.accounts.wallet.save(password, 'user-wallet'); //Stores the encypted keystore in browser local storage
+      renderDashBoard()
     }
-  }
-
-  const loadWallet = () => {
-    web3.eth.accounts.wallet.load(password);
-    renderDashBoard()
   }
 
   const renderDashBoard = () => {
