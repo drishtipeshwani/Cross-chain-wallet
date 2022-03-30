@@ -13,7 +13,7 @@ function Dashboard() {
   const [showSplitBalance, setShowSplitBalance] = useState(false);
 
   //creating context to be used by signUp
-  const network = useContext(NetworkContext);
+  const [network, setNetwork] = useContext(NetworkContext);
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     setBalanceAVAX(network.Avalanche.balance);

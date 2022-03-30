@@ -33,6 +33,9 @@ function App() {
       Ropsten: new NetworkChain("Ropsten Test Network", ropstenRPC, "3", "ETH", "https://ropsten.etherscan.io", balanceCheck(ropstenRPC + INFURA_PROJECT_ID, "ETH"))
 
     });
+
+    console.log(networks);
+
   }
   // );
 
@@ -48,6 +51,7 @@ function App() {
       }
     })
   }
+
 
 
   return (
@@ -66,3 +70,5 @@ function App() {
 
 export default App;
 export const NetworkContext = createContext();
+
+console.log(NetworkContext)
