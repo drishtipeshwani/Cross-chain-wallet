@@ -2,10 +2,9 @@ import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Form } from 'react-bootstrap'
 import web3 from '../../utils/web3'
-import { NetworkContext } from '../../App';
 
 
-function Dashboard() {
+function Dashboard(props) {
 
   const [balanceMATIC, setBalanceMATIC] = useState('');
   const [balanceAVAX, setBalanceAVAX] = useState('');
@@ -19,12 +18,13 @@ function Dashboard() {
   }, [])
 
   //creating context to be used by signUp
-  const [network, setNetwork] = useContext(NetworkContext);
+  // const [network, setNetwork] = useContext(NetworkContext);
+
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
-    setBalanceAVAX(network.Avalanche.balance);
-    setBalanceMATIC(network.Polygon.balance);
-    setBalanceETH(network.Ropsten.balance);
+    setBalanceAVAX(props.balanceAVAX);
+    setBalanceMATIC(props.balanceMATIC);
+    setBalanceETH(props.balanceETH);
   });
 
   const handleSplitBalance = () => {
@@ -36,8 +36,8 @@ function Dashboard() {
       <h1>Dashboard</h1>
       <div className='splitBalance'>
         <h3> Total Balance </h3>
-        {balanceAVAX}
-        {balanceMATIC}
+        {balanceAVAX} <br />
+        {balanceMATIC}<br />
         {balanceETH}
         <Button variant="primary" onClick={handleSplitBalance} >Get all chains linked</Button>
         {showSplitBalance ? (
@@ -45,7 +45,7 @@ function Dashboard() {
             <Card className='text-center card-ctn polygonChain'>
               <Card.Body>
                 <Card.Title>Check balance on Polygon</Card.Title>
-                <Card.Text>MATIC
+                <Card.Text>
                   {balanceMATIC}
                 </Card.Text>
               </Card.Body>
@@ -53,7 +53,7 @@ function Dashboard() {
             <Card className='text-center card-ctn polygonChain'>
               <Card.Body>
                 <Card.Title>Check balance on Avalanche</Card.Title>
-                <Card.Text>AVAX
+                <Card.Text>
                   {balanceAVAX}
                 </Card.Text>
               </Card.Body>
@@ -61,7 +61,7 @@ function Dashboard() {
             <Card className='text-center card-ctn polygonChain'>
               <Card.Body>
                 <Card.Title>Check balance on Ethereum</Card.Title>
-                <Card.Text>ETH
+                <Card.Text>
                   {balanceETH}
                 </Card.Text>
               </Card.Body>
