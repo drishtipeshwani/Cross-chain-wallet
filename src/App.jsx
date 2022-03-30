@@ -4,7 +4,8 @@ import { Routes, Route, Link } from "react-router-dom";
 import Signup from './components/signUp/SignUp';
 import Dashboard from './components/Dashboard/Dashboard';
 import Web3 from 'web3';
-import Network from './utils/network'
+import NetworkChain from './utils/network'
+import { Card, Button, Form } from 'react-bootstrap'
 
 function App() {
 
@@ -18,20 +19,23 @@ function App() {
   //setting chains
   const [networks, setNetworks] = React.useState('');
 
-  useEffect(() => {
+  // useEffect(() => {
+  const handleContext = () => {
     const INFURA_PROJECT_ID = "b8cdccd184624e938022708762b2c119" //todo
     //network context to be used by Dashboard
     setNetworks({
-      Polygon:
-        new Network("Mumbai Test Net", mumbaiRPC, "80001", "MATIC", "https://mumbai.polygonscan.com/", balanceCheck(mumbaiRPC, "MATIC"))
+      Polygon: new NetworkChain("Mumbai Test Net", mumbaiRPC, "80001", "MATIC", "https://mumbai.polygonscan.com/", balanceCheck(mumbaiRPC, "MATIC"))
+
       ,
-      Avalanche:
-        new Network("Avalanche FUJI C-Chain", fujiRPC, "43113", "AVAX", "https://testnet.snowtrace.io/", balanceCheck(fujiRPC, "AVAX"))
+      Avalanche: new NetworkChain("Avalanche FUJI C-Chain", fujiRPC, "43113", "AVAX", "https://testnet.snowtrace.io/", balanceCheck(fujiRPC, "AVAX"))
+
       ,
-      Ropsten:
-        new Network("Ropsten Test Network", ropstenRPC, "3", "ETH", "https://ropsten.etherscan.io", balanceCheck(ropstenRPC + INFURA_PROJECT_ID, "ETH"))
+      Ropsten: new NetworkChain("Ropsten Test Network", ropstenRPC, "3", "ETH", "https://ropsten.etherscan.io", balanceCheck(ropstenRPC + INFURA_PROJECT_ID, "ETH"))
+
     });
-  });
+  }
+  // );
+
 
   //finding balance of token
   const balanceCheck = (RPC, currency) => {
@@ -46,10 +50,10 @@ function App() {
   }
 
 
-
   return (
     <div className="app">
       <h1>Cross Chain Wallet</h1>
+      <Button variant="primary" onClick={handleContext} >Get context</Button>
       <NetworkContext.Provider value={networks}>
         <Routes>
           <Route path="/" element={<Signup />} />
