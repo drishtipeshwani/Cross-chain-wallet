@@ -32,7 +32,7 @@ function App() {
   }, [wallet])
 
   const handleContext = () => {
-    // const INFURA_PROJECT_ID = <env variable here>//todo
+    const INFURA_PROJECT_ID = process.env.REACT_APP_INFURA_PROJECT_ID;
     setNetworks({
       Polygon: new NetworkChain("Mumbai Test Net", mumbaiRPC, "80001", "MATIC", "https://mumbai.polygonscan.com/", balanceCheck(mumbaiRPC, "MATIC"))
 

@@ -1,10 +1,10 @@
 ## How to run Crosschain Wallet
 
-```sh
- git clone git@github.com:drishtipeshwani/Cross-chain-wallet.git
- npm install
- npm start
-```
+ - ```git clone git@github.com:drishtipeshwani/Cross-chain-wallet.git```
+ - ```npm install```
+ - ```npm start```
+ - create .env.local and add ```REACT_APP_INFURA_PROJECT_ID=<project-id-from-infura>```
+
 ### Routes
 - [Creation Wallet](http://localhost:3000/)
 - [Chain Balance](http://localhost:3000/dashboard)
