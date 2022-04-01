@@ -31,6 +31,8 @@ function App() {
     }
   }, [wallet])
 
+  
+
   const handleContext = () => {
     // const INFURA_PROJECT_ID = <env variable here>//todo
     setNetworks({
@@ -40,7 +42,7 @@ function App() {
       Avalanche: new NetworkChain("Avalanche FUJI C-Chain", fujiRPC, "43113", "AVAX", "https://testnet.snowtrace.io/", balanceCheck(fujiRPC, "AVAX"))
 
       ,
-      Ropsten: new NetworkChain("Ropsten Test Network", ropstenRPC, "3", "ETH", "https://ropsten.etherscan.io", balanceCheck(ropstenRPC + INFURA_PROJECT_ID, "ETH"))
+      Ropsten: new NetworkChain("Ropsten Test Network", ropstenRPC, "3", "ETH", "https://ropsten.etherscan.io", balanceCheck(ropstenRPC + process.env.INFURA_PROJECT_ID, "ETH"))
 
     });
 
