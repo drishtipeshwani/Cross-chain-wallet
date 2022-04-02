@@ -8,6 +8,7 @@ import Web3 from 'web3';
 import NetworkChain from './utils/network'
 import { Card, Button, Form } from 'react-bootstrap'
 import Login from './components/Login'
+import Home from './components/Home/Home'
 
 function App() {
 
@@ -111,6 +112,7 @@ function App() {
         {console.log(authed)}
         <Route path='/' element={authed ? <Login /> : <Signup />} />
         <Route path="/dashboard" element={<Dashboard balanceAVAX={balanceAVAX} balanceETH={balanceETH} balanceMATIC={balanceMATIC} />} />
+        <Route path="/home" element={<Home />} />
       </Routes>
     </div>
   );
