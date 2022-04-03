@@ -32,7 +32,7 @@ function SignUp(props) {
 
   const createWallet = () => {
 
-    let RPC = props.networks.filter(network => network.chainName === defaultNetwork)[0].RPC
+    let RPC = props.rpcArray.filter(network => network.Name === defaultNetwork)[0].RPC
     let web3 = new Web3(new Web3.providers.HttpProvider(RPC));
 
     const userInput = inputPhrase.split(' ')

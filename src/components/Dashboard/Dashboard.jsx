@@ -16,7 +16,7 @@ function Dashboard(props) {
   
   React.useEffect(() => {
     let defaultNetwork = localStorage.getItem('defaultNetwork');
-    let RPC = props.networks.filter(network => network.chainName === defaultNetwork)[0].RPC
+    let RPC = props.rpcArray.filter(network => network.Name === defaultNetwork)[0].RPC
     let web3 = new Web3(new Web3.providers.HttpProvider(RPC));
     setWallet(web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet'));
     console.log(wallet)
