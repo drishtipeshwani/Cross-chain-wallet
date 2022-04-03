@@ -1,4 +1,4 @@
-import React, { useEffect, createContext, useState } from 'react'
+import React, { useEffect, useContext, useState } from 'react'
 import './App.css';
 import { Routes, Route, Link } from "react-router-dom";
 import Signup from './components/signUp/SignUp';
@@ -7,6 +7,7 @@ import Web3 from 'web3';
 import NetworkChain from './utils/network'
 import { Card, Button, Form } from 'react-bootstrap'
 import Login from './components/Login'
+
 
 function App() {
 
@@ -23,7 +24,8 @@ function App() {
   //this is for demo
   const address = "0xE5Bb1Ab7c83a32D900EF7BEF2B7dbE3146502A7b";
   //setting chains
-  const [networks, setNetworks] = React.useState('');
+  
+  const [networks,setNetworks] = useState([])
 
   useEffect(() => {
     if (wallet) {
@@ -31,25 +33,19 @@ function App() {
     }
   }, [wallet])
 
-  
-
-  const handleContext = () => {
-    // const INFURA_PROJECT_ID = <env variable here>//todo
-    setNetworks({
-      Polygon: new NetworkChain("Mumbai Test Net", mumbaiRPC, "80001", "MATIC", "https://mumbai.polygonscan.com/", balanceCheck(mumbaiRPC, "MATIC"))
+  useEffect(() => {
+    setNetworks([
+      new NetworkChain("Polygon","Mumbai Test Net", mumbaiRPC, "80001", "MATIC", "https://mumbai.polygonscan.com/", balanceCheck(mumbaiRPC, "MATIC"))
 
       ,
-      Avalanche: new NetworkChain("Avalanche FUJI C-Chain", fujiRPC, "43113", "AVAX", "https://testnet.snowtrace.io/", balanceCheck(fujiRPC, "AVAX"))
+      new NetworkChain("Avalanche","Avalanche FUJI C-Chain", fujiRPC, "43113", "AVAX", "https://testnet.snowtrace.io/", balanceCheck(fujiRPC, "AVAX"))
 
       ,
-      Ropsten: new NetworkChain("Ropsten Test Network", ropstenRPC, "3", "ETH", "https://ropsten.etherscan.io", balanceCheck(ropstenRPC + process.env.INFURA_PROJECT_ID, "ETH"))
+      new NetworkChain("Etherum","Ropsten Test Network", ropstenRPC, "3", "ETH", "https://ropsten.etherscan.io", balanceCheck(ropstenRPC + process.env.REACT_APP_INFURA_PROJECT_ID, "ETH"))
 
-    });
-
-    console.log(networks);
-
-  }
-
+    ]);  
+   
+  },[])
 
   //finding balance of token
   const balanceCheck = (RPC, currency) => {
@@ -79,11 +75,9 @@ function App() {
   return (
     <div className="app">
       <h1>Cross Chain Wallet</h1>
-      <Button variant="primary" onClick={handleContext} >Get context</Button>
       <Routes>
-        {console.log(authed)}
-        <Route path='/' element={authed ? <Login /> : <Signup />} />
-        <Route path="/dashboard" element={<Dashboard balanceAVAX={balanceAVAX} balanceETH={balanceETH} balanceMATIC={balanceMATIC} />} />
+        <Route path='/' element={authed ? <Login /> : <Signup networks={networks}/>} />
+        <Route path="/dashboard" element={<Dashboard balanceAVAX={balanceAVAX} balanceETH={balanceETH} balanceMATIC={balanceMATIC} networks={networks}/>} />
       </Routes>
     </div>
   );

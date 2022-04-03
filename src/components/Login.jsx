@@ -1,8 +1,6 @@
-import React from 'react'
+import React,{useContext} from 'react'
 import {Card,Button,Form} from 'react-bootstrap'
-import web3 from '../utils/web3'
 import { useNavigate } from 'react-router-dom';
-import Dashboard from './Dashboard/Dashboard';
 
 function Login() {
 

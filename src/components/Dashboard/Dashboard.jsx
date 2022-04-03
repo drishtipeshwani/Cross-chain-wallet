@@ -1,8 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Form } from 'react-bootstrap'
-import web3 from '../../utils/web3'
-
+import Web3 from 'web3';
 
 function Dashboard(props) {
 
@@ -12,10 +11,16 @@ function Dashboard(props) {
   const [showSplitBalance, setShowSplitBalance] = useState(false);
   const [wallet, setWallet] = React.useState(null);
 
+  const navigate = useNavigate();
 
+  
   React.useEffect(() => {
+    let defaultNetwork = localStorage.getItem('defaultNetwork');
+    let RPC = props.networks.filter(network => network.chainName === defaultNetwork)[0].RPC
+    let web3 = new Web3(new Web3.providers.HttpProvider(RPC));
     setWallet(web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet'));
-  }, [])
+    console.log(wallet)
+  },[])
 
   //creating context to be used by signUp
   // const [network, setNetwork] = useContext(NetworkContext);
