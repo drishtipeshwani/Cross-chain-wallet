@@ -13,13 +13,25 @@ function Dashboard(props) {
 
   const navigate = useNavigate();
 
+
+
+  const alertUser = () => {
+    console.log('unload');
+  }
+
   
   React.useEffect(() => {
+  
+    if(props.rpcArray.length > 0){
     let defaultNetwork = localStorage.getItem('defaultNetwork');
+    console.log(props.rpcArray)
     let RPC = props.rpcArray.filter(network => network.Name === defaultNetwork)[0].RPC
     let web3 = new Web3(new Web3.providers.HttpProvider(RPC));
     setWallet(web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet'));
     console.log(wallet)
+    }else{
+      navigate('/')
+    }
   },[])
 
   //creating context to be used by signUp
