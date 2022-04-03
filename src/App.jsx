@@ -79,8 +79,8 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Cross Chain Wallet</h1>
-      <Button variant="primary" onClick={handleContext} >Get context</Button>
+      <h1 style={{ fontSize: "80px" }}>💸Cross Chain Wallet</h1>
+      <Button variant="primary" onClick={handleContext} >Total Balance</Button>
       {/* <NetworkContext.Provider  value={networks}> */}
       <Routes>
         {console.log(authed)}
