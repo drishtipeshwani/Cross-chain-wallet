@@ -13,13 +13,16 @@ class Home extends React.Component {
       Avalanche: '',
       Kovan: '',
       address: "0xE5Bb1Ab7c83a32D900EF7BEF2B7dbE3146502A7b",
-      balanceETH: 0,
-      balanceMATIC: 0,
-      balanceAVAX: 0,
+      totalBalanceETH: 0,
+      totalBalanceMATIC: 0,
+      totalBalanceAVAX: 0,
+      balanceETHKovan: 0,
+      balanceETHPolygon: 0,
+      balanceETHAvalanche: 0,
+
     }
     this.web3 = new Web3(new Web3.providers.HttpProvider(networks.Polygon.rpc));
   }
-
 
   componentDidMount(){
     this.getData(networks.Polygon);
@@ -28,7 +31,16 @@ class Home extends React.Component {
   }
 
   getData = async (network) => {
-    const { address, balanceAVAX, balanceETH, balanceMATIC } = this.state;
+    const { 
+      address,
+      totalBalanceAVAX,
+      totalBalanceETH,
+      totalBalanceMATIC,
+      balanceETHAvalanche,
+      balanceETHPolygon,
+      balanceETHKovan,
+    } = this.state;
+
     const options = {
       method: 'GET',
       url: `https://api.covalenthq.com/v1/${network.chainId}/address/${address}/balances_v2/`,
@@ -48,25 +60,26 @@ class Home extends React.Component {
     let tokenAmounts = {};
 
     tokens.forEach(token => {
+      console.log(token);
       let symbol = token.contract_ticker_symbol
       tokenAmounts[symbol] = this.web3.utils.fromWei(token.balance, 'ether');
-      console.log(typeof(this.state.balanceETH), parseFloat(tokenAmounts[symbol]));
-
 
       if (symbol == "ETH" || symbol == "WETH") {
+        let stateName = "balanceETH" + network.name;
         this.setState({
-          balanceETH: this.state.balanceETH + parseFloat(tokenAmounts[symbol])
+          totalBalanceETH: this.state.totalBalanceETH + parseFloat(tokenAmounts[symbol]),
+          [stateName]: this.state[stateName] + parseFloat(tokenAmounts[symbol])
         })
 
       }
       if (symbol === "MATIC") {
         this.setState({
-          balanceMATIC: this.state.balanceMATIC + parseFloat(tokenAmounts[symbol])
+          totalBalanceMATIC: this.state.totalBalanceMATIC + parseFloat(tokenAmounts[symbol])
         })
       }
       if (symbol === "AVAX") {
         this.setState({
-          balanceAVAX: this.state.balanceAVAX + parseFloat(tokenAmounts[symbol])
+          totalBalanceAVAX: this.state.totalBalanceAVAX + parseFloat(tokenAmounts[symbol])
         })
       }
     });
@@ -86,13 +99,26 @@ class Home extends React.Component {
           <Col>
             <h1>Balances</h1>
             <Row>
-              ETH: {this.state.balanceETH}
+              <Col>
+                ETH: {this.state.totalBalanceETH}
+              </Col>
+              <Col>
+                <Row>
+                  Kovan: {this.state.balanceETHKovan}
+                </Row>
+                <Row>
+                  Avalanch: {this.state.balanceETHAvalanche}
+                </Row>
+                <Row>
+                  Polygon: {this.state.balanceETHPolygon}
+                </Row>
+              </Col>
             </Row>
             <Row>
-              Matic: {this.state.balanceMATIC}
+              Matic: {this.state.totalBalanceMATIC}
             </Row>
             <Row>
-              Avax: {this.state.balanceAVAX}
+              Avax: {this.state.totalBalanceAVAX}
             </Row>
           </Col>
           <Col>
