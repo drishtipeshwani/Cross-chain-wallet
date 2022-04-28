@@ -42,7 +42,7 @@ function SignUp() {
   }
 
   const renderDashBoard = () => {
-    navigate('/dashboard')
+    navigate('/home')
   }
 
   return (
