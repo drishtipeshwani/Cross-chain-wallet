@@ -35,7 +35,8 @@ function SignUp() {
     if (JSON.stringify(userInput) !== JSON.stringify(phrase)) {
       alert('Incorrect phrase')
     } else {
-      web3.eth.accounts.wallet.create(1, JSON.stringify(phrase));
+      let walletObj = web3.eth.accounts.wallet.create(1, JSON.stringify(phrase));
+      console.log(walletObj)
       web3.eth.accounts.wallet.save(password, 'user-wallet'); //Stores the encypted keystore in browser local storage
       renderDashBoard()
     }
