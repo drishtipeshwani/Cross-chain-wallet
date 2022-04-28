@@ -1,6 +1,6 @@
 const fujiRPC = "https://api.avax-test.network/ext/bc/C/rpc";
 const kovanRPC = "https://kovan.infura.io/v3/";
-const mumbaiRPC = "https://rpc-mumbai.matic.today/";
+const mumbaiRPC = "https://matic-mumbai.chainstacklabs.com";
 const goerliRPC = "https://goerli.prylabs.net";
 
 const networks = {
@@ -22,6 +22,7 @@ const networks = {
       name: "Kovan",
       rpc: kovanRPC,
       chainId: 42,
+      eth: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
     },
     Goerli: {
       name: "Goerli",

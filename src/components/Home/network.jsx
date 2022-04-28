@@ -14,4 +14,9 @@ const networks = {
     rpc: kovanRPC,
     chainId: 42,
   },
+  Goerli: {
+    name: "Goerli Test Net",
+    rpc: goerliRPC,
+    chainId: 5,
+  },
 }

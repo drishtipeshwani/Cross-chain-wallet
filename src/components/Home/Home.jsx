@@ -4,6 +4,7 @@ import { Container, Row, Col } from 'react-bootstrap'
 import networks from "../../utils/network";
 import Web3 from 'web3';
 import { Hyphen, SIGNATURE_TYPES, RESPONSE_CODES } from "@biconomy/hyphen";
+import './Home.css';
 
 
 class Home extends React.Component {
@@ -14,49 +15,66 @@ class Home extends React.Component {
       Polygon: '',
       Avalanche: '',
       Kovan: '',
-      address: "0xE5Bb1Ab7c83a32D900EF7BEF2B7dbE3146502A7b",
       totalBalanceETH: 0,
       totalBalanceUSDC: 0,
       totalBalanceMATIC: 0,
       totalBalanceAVAX: 0,
       balanceETHKovan: 0,
-      balanceETHGoerli: 0,
       balanceETHPolygon: 0,
       balanceETHAvalanche: 0,
-      wallet: null
-
+      wallet:null,
+      senderInput: '',
+      receiverInput: '',
+      amountInput: '',
     }
     this.web3 = new Web3(new Web3.providers.HttpProvider(networks.Polygon.rpc));
   }
 
-  componentDidMount(){
-    // this.getData(networks.Polygon);
-    // this.getData(networks.Avalanche);
-    // this.getData(networks.Kovan);
-    this.initializeWallet();
+  updateAmount(e){ 
+    // Changing state 
+    this.setState({amountInput: e.target.value});
+  } 
 
+  updateSender(e){
+    this.setState({senderInput: e.target.value});
   }
 
-  initializeWallet = async () => {
+  updateReceiver(e){
+    this.setState({receiverInput: e.target.value});
+    
+  }
+
+
+  componentDidMount(){
+     this.getData(networks.Polygon);
+     this.getData(networks.Avalanche);
+      this.getData(networks.Kovan);
+    this.wallet  = this.web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet')
+  }
+
+  initializeTransaction = async () => {
     let wallet = this.web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet')
     console.log(wallet);
     let provider = wallet._accounts._provider
     console.log(provider);
     let hyphen = new Hyphen(provider, {
       debug: true,            // If 'true', it prints debug logs on console window
-      environment: "staging",    // It can be "test" or "prod"
-      // onFundsTransfered: (data) => {
-      //   // Optional Callback method which will be called when funds transfer across
+      environment: "test",    // It can be "test" or "prod"
+      onFundsTransfered: (data) => {
+        console.log(data);
+       // Optional Callback method which will be called when funds transfer across
       //   // chains will be completed
-      // }
+       }
     });
-    hyphen.init();
+
+     //Initializing the hyphen sdk
+    await hyphen.init();
 
     let amount = this.web3.utils.toWei('0.2', 'ether');
     let preTransferStatus = await hyphen.depositManager.preDepositStatus({
-      tokenAddress: networks.Goerli.eth, // Token address on fromChain which needs to be transferred
+      tokenAddress: networks.Kovan.eth, // Token address on fromChain which needs to be transferred
       amount: amount.toString(), // Amount of tokens to be transferred in smallest unit eg wei
-      fromChainId: networks.Goerli.chainId, // Chain id from where tokens needs to be transferred
+      fromChainId: networks.Kovan.chainId, // Chain id from where tokens needs to be transferred
       toChainId: networks.Polygon.chainId, // Chain id where tokens are supposed to be sent
       userAddress: wallet[0].address // User wallet address who want's to do the transfer
     });
@@ -71,9 +89,9 @@ class Home extends React.Component {
       // ❌ Not enough apporval from user address on LiquidityPoolManager contract on fromChain
 
       let approveTx = {
-        tokenAddress: networks.Goerli.eth, // Token address on fromChain which needs to be transferred
+        tokenAddress: networks.Kovan.eth, // Token address on fromChain which needs to be transferred
         spender: preTransferStatus.depositContract,
-        amount: amount,
+        amount: amount.toString(),
         userAddress: wallet[0].address,
         infiniteApproval: true,
         useBiconomy: true
@@ -103,31 +121,59 @@ class Home extends React.Component {
     } else {
       // ❌ Any other unexpected error
     }
+    let amountInput = 0;
+     if(this.state.amountInput!==''){
+        amountInput  = this.web3.utils.toWei(this.state.amountInput, 'ether');
+    }
+    let senderChain;
+    let receiverChain;
+    console.log(this.state.receiverInput)
+    console.log(this.state.senderInput)
+    if(this.state.senderInput === 'Polygon'){
+      senderChain = networks.Polygon.chainId;
+    }
+    else if(this.state.senderInput === 'Avalanche'){
+      senderChain = networks.Avalanche.chainId;
+    }
+    else if(this.state.senderInput === 'Ethereum'){
+      senderChain = networks.Kovan.chainId;
+    }
 
-    
-    let depositTx = {
+    if(this.state.receiverInput === 'Polygon'){
+      receiverChain = networks.Polygon.chainId;
+    }
+    else if(this.state.receiverInput === 'Avalanche'){
+      receiverChain = networks.Avalanche.chainId;
+    }
+    else if(this.state.receiverInput === 'Ethereum'){
+      receiverChain = networks.Kovan.chainId;
+    }
+
+    console.log(senderChain, receiverChain);
+    let tx = {
       mode: 'no-cores',
       gas: 1000000,
       sender: wallet[0].address,
-      receiver: "0x1da502D83c2967cD185E9179376F1edA3DC52922", //my account-1
-      tokenAddress: networks.Goerli.eth,
+      receiver: wallet[0].address, //my account-1
+      tokenAddress: networks.Kovan.eth,
       depositContractAddress: preTransferStatus.depositContract,
-      amount: amount, //Amount to be transferred. Denoted in smallest unit eg in wei",
-      fromChainId: networks.Goerli.chainId, // chainId of fromChain
-      toChainId: networks.Polygon.chainId,     // chainId of toChain
+      amount: amountInput.toString(), //Amount to be transferred. Denoted in smallest unit eg in wei",
+      fromChainId: senderChain, // chainId of fromChain
+      toChainId: receiverChain,     // chainId of toChain
       // useBiconomy: true, // OPTIONAL boolean flag specifying whether to use Biconomy for gas less transaction or not
-      tag: "Dapp specific identifier", // Can be any string, emitted from the contract during the deposit call; used for analytics
-    };
-    console.log(depositTx);
+      tag: "Dapp specific identifier",
+    }
+    
+    console.log(tx);
+    let signedTx = await this.web3.eth.accounts.signTransaction(tx, wallet[0].privateKey)
 
-    let signedTx = await this.web3.eth.accounts.signTransaction(depositTx, wallet[0].privateKey)
     console.log(signedTx);
 
     let depositTxRes = await hyphen.depositManager.deposit(signedTx);
     console.log(depositTxRes);
-
     // Wait for 1 block confirmation
-    await depositTxRes.wait(1);
+      await tx.wait(1);
+
   }
 
 
@@ -140,12 +186,16 @@ class Home extends React.Component {
       balanceETHAvalanche,
       balanceETHPolygon,
       balanceETHKovan,
-      balanceETHGoerli,
     } = this.state;
+
+
+
+    let wallet = this.web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet')
+
 
     const options = {
       method: 'GET',
-      url: `https://api.covalenthq.com/v1/${network.chainId}/address/${address}/balances_v2/`,
+      url: `https://api.covalenthq.com/v1/${network.chainId}/address/${wallet[0].address}/balances_v2/`,
       params:  {
         key: process.env.REACT_APP_COVALENT_API_KEY
       }
@@ -156,6 +206,8 @@ class Home extends React.Component {
     }).catch(function (error) {
         console.log(error);
     });
+
+    console.log(data)
     
     let tokens = data.data.items;
 
@@ -196,7 +248,8 @@ class Home extends React.Component {
 
   render(){
     return (
-      <Container>      
+      <Container>    
+       {this.wallet && <h5>Account Address - <span>{this.wallet[0].address}</span></h5> }
         <Row>
           <Col>
             <h1>Balances</h1>
@@ -225,15 +278,34 @@ class Home extends React.Component {
           </Col>
           <Col>
             <h1>Transfer token</h1>
-            <Row>
-              1
-            </Row>
-            <Row>
-              1
-            </Row>
-            <Row>
-              1
-            </Row>
+             <div className="transfer-ctn">
+               <Row className="input-ctn">
+                 <p>SOURCE</p>
+                 <select onChange={(e)=>{this.updateSender(e)}} value={this.state.senderInput}>
+                   <option value='default'>Select Chain</option>
+                    <option value="Polygon">Polygon</option>
+                    <option value="Avalanche">Avalanche</option>
+                    <option value = "Ethereum">Ethereum</option>
+                 </select>
+               </Row>
+               <Row className="input-ctn">
+                 <p>DESTINATION</p>
+                 <select onChange={(e)=>{this.updateReceiver(e)}} value={this.state.receiverInput}>
+                 <option value='default'>Select Chain</option>
+                    <option value="Polygon">Polygon</option>
+                    <option value="Avalanche">Avalanche</option>
+                    <option value = "Ethereum">Ethereum</option>
+                 </select>
+               </Row>
+               <Row className="input-ctn">
+                 <p>AMOUNT</p>
+                 {/**Define input field for input amount */}
+                  <input type="text" placeholder="0.00" value={this.amountInput} onChange={(e)=>this.updateAmount(e)}/>
+               </Row>
+               <Row className="input-ctn">
+                <button className="button-ctn" onClick={this.initializeTransaction}>Transfer</button>
+               </Row>
+             </div>
           </Col>
         </Row>
       </Container>

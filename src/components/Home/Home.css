@@ -1,0 +1,10 @@
+.input-ctn{
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px !important;
+}
+
+.button-ctn{
+    padding: 2.5px;
+    margin-top: 8px !important;
+}

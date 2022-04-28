@@ -70,7 +70,7 @@ function App() {
           console.log(error);
       });
 
-      console.log(data);
+     // console.log(data);
     });
   }
 
