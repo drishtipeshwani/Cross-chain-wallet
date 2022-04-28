@@ -18,5 +18,4 @@
 - [ ] Import account, or import token
 
 ### Comments
-- Get Context button on top will be removed
 - Alignment to be made
