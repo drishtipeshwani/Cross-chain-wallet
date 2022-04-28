@@ -20,7 +20,7 @@ function Login() {
     }
 
     const renderDashboard = () => {
-      navigate('/dashboard')
+      navigate('/home')
     }
 
     return (

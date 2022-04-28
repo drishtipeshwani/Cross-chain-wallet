@@ -47,13 +47,8 @@ function App() {
     if (wallet) {
       setAuthed(true);
     }
+    balance()
   }, [wallet])
-
-  const handleContext = () => {
-    const INFURA_PROJECT_ID = process.env.REACT_APP_INFURA_PROJECT_ID;
-
-    balance();
-  }
 
 
   const balance = async () => {
@@ -107,7 +102,6 @@ function App() {
   return (
     <div className="app">
       <h1>Cross Chain Wallet</h1>
-      <Button variant="primary" onClick={handleContext} >Get context</Button>
       <Routes>
         {console.log(authed)}
         <Route path='/' element={authed ? <Login /> : <Signup />} />
