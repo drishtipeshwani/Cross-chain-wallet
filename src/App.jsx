@@ -101,7 +101,7 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Cross Chain Wallet</h1>
+      <h1>Across - A Cross Chain Wallet</h1>
       <Routes>
         {console.log(authed)}
         <Route path='/' element={authed ? <Login /> : <Signup />} />

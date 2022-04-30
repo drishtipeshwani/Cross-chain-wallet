@@ -8,3 +8,34 @@
     padding: 2.5px;
     margin-top: 8px !important;
 }
+
+.home{
+    background-color: white;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: space-between;
+}
+
+.home span{
+    color : #205375;
+}
+
+.transfer-ctn{
+    margin: 12px;
+}
+
+.transfer-ctn h3{
+    color:#205375;
+}
+
+.balance-ctn{
+    margin: 12px;
+}
+
+.balance-ctn h3{
+    color:#205375;
+}

@@ -174,6 +174,23 @@ class Home extends React.Component {
     // Wait for 1 block confirmation
       await tx.wait(1);
 
+      //Giva a alert to user about the transaction status
+      if(depositTxRes.code === RESPONSE_CODES.OK){
+        alert('Transaction successful');
+      }
+      else if(depositTxRes.code === RESPONSE_CODES.INSUFFICIENT_BALANCE){
+        alert('Insufficient balance');
+      }
+      else if(depositTxRes.code === RESPONSE_CODES.INVALID_TOKEN_ADDRESS){
+        alert('Invalid token address');
+      }
+      else if(depositTxRes.code === RESPONSE_CODES.INVALID_DEPOSIT_CONTRACT_ADDRESS){
+        alert('Invalid deposit contract address');
+      }
+      else if(depositTxRes.code === RESPONSE_CODES.INVALID_AMOUNT){
+        alert('Invalid amount');
+      }
+    
   }
 
 
@@ -248,11 +265,12 @@ class Home extends React.Component {
 
   render(){
     return (
-      <Container>    
-       {this.wallet && <h5>Account Address - <span>{this.wallet[0].address}</span></h5> }
+      <Container className='home'>    
+       {this.wallet && <h5><span>Account Address</span> - {this.wallet[0].address}</h5> }
         <Row>
+        <div className="balance-ctn">
           <Col>
-            <h1>Balances</h1>
+            <h3>Balances</h3>
             <Row>
               <Col>
                 ETH: {this.state.totalBalanceETH}
@@ -276,9 +294,10 @@ class Home extends React.Component {
               Avax: {this.state.totalBalanceAVAX}
             </Row>
           </Col>
+          </div>
           <Col>
-            <h1>Transfer token</h1>
              <div className="transfer-ctn">
+             <h3>Transfer token</h3>
                <Row className="input-ctn">
                  <p>SOURCE</p>
                  <select onChange={(e)=>{this.updateSender(e)}} value={this.state.senderInput}>
