@@ -22,34 +22,35 @@ class Home extends React.Component {
       balanceETHKovan: 0,
       balanceETHPolygon: 0,
       balanceETHAvalanche: 0,
-      wallet:null,
+      wallet: null,
       senderInput: '',
       receiverInput: '',
       amountInput: '',
+      demoAddress: '0xE5Bb1Ab7c83a32D900EF7BEF2B7dbE3146502A7b'
     }
     this.web3 = new Web3(new Web3.providers.HttpProvider(networks.Polygon.rpc));
   }
 
-  updateAmount(e){ 
+  updateAmount(e) {
     // Changing state 
-    this.setState({amountInput: e.target.value});
-  } 
-
-  updateSender(e){
-    this.setState({senderInput: e.target.value});
+    this.setState({ amountInput: e.target.value });
   }
 
-  updateReceiver(e){
-    this.setState({receiverInput: e.target.value});
-    
+  updateSender(e) {
+    this.setState({ senderInput: e.target.value });
+  }
+
+  updateReceiver(e) {
+    this.setState({ receiverInput: e.target.value });
+
   }
 
 
-  componentDidMount(){
-     this.getData(networks.Polygon);
-     this.getData(networks.Avalanche);
-      this.getData(networks.Kovan);
-    this.wallet  = this.web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet')
+  componentDidMount() {
+    this.getData(networks.Polygon);
+    this.getData(networks.Avalanche);
+    this.getData(networks.Kovan);
+    this.wallet = this.web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet')
   }
 
   initializeTransaction = async () => {
@@ -62,12 +63,12 @@ class Home extends React.Component {
       environment: "test",    // It can be "test" or "prod"
       onFundsTransfered: (data) => {
         console.log(data);
-       // Optional Callback method which will be called when funds transfer across
-      //   // chains will be completed
-       }
+        // Optional Callback method which will be called when funds transfer across
+        //   // chains will be completed
+      }
     });
 
-     //Initializing the hyphen sdk
+    //Initializing the hyphen sdk
     await hyphen.init();
 
     let amount = this.web3.utils.toWei('0.2', 'ether');
@@ -76,15 +77,16 @@ class Home extends React.Component {
       amount: amount.toString(), // Amount of tokens to be transferred in smallest unit eg wei
       fromChainId: networks.Kovan.chainId, // Chain id from where tokens needs to be transferred
       toChainId: networks.Polygon.chainId, // Chain id where tokens are supposed to be sent
-      userAddress: wallet[0].address // User wallet address who want's to do the transfer
+      // userAddress: wallet[0].address // User wallet address who want's to do the transfer
+      userAddress: this.state.demoAddress // this is demoAddress
     });
 
     console.log(preTransferStatus.code, RESPONSE_CODES.OK);
     console.log(preTransferStatus);
-    
+
     if (preTransferStatus.code === RESPONSE_CODES.OK) {
       // ✅ ALL CHECKS PASSED. Proceed to do deposit transaction
-    } else if(preTransferStatus.code === RESPONSE_CODES.ALLOWANCE_NOT_GIVEN) {
+    } else if (preTransferStatus.code === RESPONSE_CODES.ALLOWANCE_NOT_GIVEN) {
       console.log('Allowance not given');
       // ❌ Not enough apporval from user address on LiquidityPoolManager contract on fromChain
 
@@ -92,7 +94,8 @@ class Home extends React.Component {
         tokenAddress: networks.Kovan.eth, // Token address on fromChain which needs to be transferred
         spender: preTransferStatus.depositContract,
         amount: amount.toString(),
-        userAddress: wallet[0].address,
+        // userAddress: wallet[0].address,
+        userAddress: this.state.demoAddress, // this is demoAddress
         infiniteApproval: true,
         useBiconomy: true
       };
@@ -103,15 +106,15 @@ class Home extends React.Component {
       let approveTxRes = await hyphen.tokens.approveERC20(approveTx);
       // ⏱Wait for the transaction to confirm, pass a number of blocks to wait as param
       console.log(approveTxRes);
-      
+
       await approveTxRes.wait(1);
-      
+
       // NOTE: Whenever there is a transaction done via SDK, all responses
       // will be ethers.js compatible with an async wait() function that
       // can be called with 'await' to wait for transaction confirmation.
-      
+
       // 🆗Now proceed to do the deposit transaction
-      
+
     } else if (preTransferStatus.code === RESPONSE_CODES.UNSUPPORTED_NETWORK) {
       // ❌ Target chain id is not supported yet
     } else if (preTransferStatus.code === RESPONSE_CODES.NO_LIQUIDITY) {
@@ -122,30 +125,30 @@ class Home extends React.Component {
       // ❌ Any other unexpected error
     }
     let amountInput = 0;
-     if(this.state.amountInput!==''){
-        amountInput  = this.web3.utils.toWei(this.state.amountInput, 'ether');
+    if (this.state.amountInput !== '') {
+      amountInput = this.web3.utils.toWei(this.state.amountInput, 'ether');
     }
     let senderChain;
     let receiverChain;
     console.log(this.state.receiverInput)
     console.log(this.state.senderInput)
-    if(this.state.senderInput === 'Polygon'){
+    if (this.state.senderInput === 'Polygon') {
       senderChain = networks.Polygon.chainId;
     }
-    else if(this.state.senderInput === 'Avalanche'){
+    else if (this.state.senderInput === 'Avalanche') {
       senderChain = networks.Avalanche.chainId;
     }
-    else if(this.state.senderInput === 'Ethereum'){
+    else if (this.state.senderInput === 'Ethereum') {
       senderChain = networks.Kovan.chainId;
     }
 
-    if(this.state.receiverInput === 'Polygon'){
+    if (this.state.receiverInput === 'Polygon') {
       receiverChain = networks.Polygon.chainId;
     }
-    else if(this.state.receiverInput === 'Avalanche'){
+    else if (this.state.receiverInput === 'Avalanche') {
       receiverChain = networks.Avalanche.chainId;
     }
-    else if(this.state.receiverInput === 'Ethereum'){
+    else if (this.state.receiverInput === 'Ethereum') {
       receiverChain = networks.Kovan.chainId;
     }
 
@@ -163,7 +166,7 @@ class Home extends React.Component {
       // useBiconomy: true, // OPTIONAL boolean flag specifying whether to use Biconomy for gas less transaction or not
       tag: "Dapp specific identifier",
     }
-    
+
     console.log(tx);
     let signedTx = await this.web3.eth.accounts.signTransaction(tx, wallet[0].privateKey)
 
@@ -172,13 +175,13 @@ class Home extends React.Component {
     let depositTxRes = await hyphen.depositManager.deposit(signedTx);
     console.log(depositTxRes);
     // Wait for 1 block confirmation
-      await tx.wait(1);
+    await tx.wait(1);
 
   }
 
 
   getData = async (network) => {
-    const { 
+    const {
       address,
       totalBalanceAVAX,
       totalBalanceETH,
@@ -196,7 +199,7 @@ class Home extends React.Component {
     const options = {
       method: 'GET',
       url: `https://api.covalenthq.com/v1/${network.chainId}/address/${wallet[0].address}/balances_v2/`,
-      params:  {
+      params: {
         key: process.env.REACT_APP_COVALENT_API_KEY
       }
     }
@@ -204,11 +207,11 @@ class Home extends React.Component {
     const data = await axios.request(options).then(function (response) {
       return response.data;
     }).catch(function (error) {
-        console.log(error);
+      console.log(error);
     });
 
     console.log(data)
-    
+
     let tokens = data.data.items;
 
     let tokenAmounts = {};
@@ -238,18 +241,18 @@ class Home extends React.Component {
       }
     });
 
-    
+
     this.setState({
-      [network.name] : {
+      [network.name]: {
         ...tokenAmounts
       }
     })
   }
 
-  render(){
+  render() {
     return (
-      <Container>    
-       {this.wallet && <h5>Account Address - <span>{this.wallet[0].address}</span></h5> }
+      <Container>
+        {this.wallet && <h5>Account Address - <span>{this.wallet[0].address}</span></h5>}
         <Row>
           <Col>
             <h1>Balances</h1>
@@ -278,34 +281,34 @@ class Home extends React.Component {
           </Col>
           <Col>
             <h1>Transfer token</h1>
-             <div className="transfer-ctn">
-               <Row className="input-ctn">
-                 <p>SOURCE</p>
-                 <select onChange={(e)=>{this.updateSender(e)}} value={this.state.senderInput}>
-                   <option value='default'>Select Chain</option>
-                    <option value="Polygon">Polygon</option>
-                    <option value="Avalanche">Avalanche</option>
-                    <option value = "Ethereum">Ethereum</option>
-                 </select>
-               </Row>
-               <Row className="input-ctn">
-                 <p>DESTINATION</p>
-                 <select onChange={(e)=>{this.updateReceiver(e)}} value={this.state.receiverInput}>
-                 <option value='default'>Select Chain</option>
-                    <option value="Polygon">Polygon</option>
-                    <option value="Avalanche">Avalanche</option>
-                    <option value = "Ethereum">Ethereum</option>
-                 </select>
-               </Row>
-               <Row className="input-ctn">
-                 <p>AMOUNT</p>
-                 {/**Define input field for input amount */}
-                  <input type="text" placeholder="0.00" value={this.amountInput} onChange={(e)=>this.updateAmount(e)}/>
-               </Row>
-               <Row className="input-ctn">
+            <div className="transfer-ctn">
+              <Row className="input-ctn">
+                <p>SOURCE</p>
+                <select onChange={(e) => { this.updateSender(e) }} value={this.state.senderInput}>
+                  <option value='default'>Select Chain</option>
+                  <option value="Polygon">Polygon</option>
+                  <option value="Avalanche">Avalanche</option>
+                  <option value="Ethereum">Ethereum</option>
+                </select>
+              </Row>
+              <Row className="input-ctn">
+                <p>DESTINATION</p>
+                <select onChange={(e) => { this.updateReceiver(e) }} value={this.state.receiverInput}>
+                  <option value='default'>Select Chain</option>
+                  <option value="Polygon">Polygon</option>
+                  <option value="Avalanche">Avalanche</option>
+                  <option value="Ethereum">Ethereum</option>
+                </select>
+              </Row>
+              <Row className="input-ctn">
+                <p>AMOUNT</p>
+                {/**Define input field for input amount */}
+                <input type="text" placeholder="0.00" value={this.amountInput} onChange={(e) => this.updateAmount(e)} />
+              </Row>
+              <Row className="input-ctn">
                 <button className="button-ctn" onClick={this.initializeTransaction}>Transfer</button>
-               </Row>
-             </div>
+              </Row>
+            </div>
           </Col>
         </Row>
       </Container>
