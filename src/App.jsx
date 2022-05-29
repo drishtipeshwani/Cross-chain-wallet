@@ -44,64 +44,45 @@ function App() {
   })
 
   useEffect(() => {
-    if (wallet) {
-      setAuthed(true);
-    }
     balance()
   }, [wallet])
 
 
   const balance = async () => {
-
+    console.log("in balance");
     Object.keys(networks).map(async (key) => {
       let chainId = networks[key].chainId;
 
       const options = {
         method: 'GET',
         url: `https://api.covalenthq.com/v1/${chainId}/address/${address}/balances_v2/`,
-        params:  {
+        params: {
           key: process.env.REACT_APP_COVALENT_API_KEY
         }
       }
 
       const data = await axios.request(options).then(function (response) {
+        let x = response.data.data.items[0].balance / Math.pow(10, 18);
+        if (response.data.data.items[0].contract_ticker_symbol === "MATIC")
+          setBalanceMATIC(x + " " + "MATIC");
+        if (response.data.data.items[0].contract_ticker_symbol === "ETH")
+          setBalanceETH(x + " " + "ETH");
+        if (response.data.data.items[0].contract_ticker_symbol === "AVAX")
+          setBalanceAVAX(x + " " + "AVAX");
         return response.data;
       }).catch(function (error) {
-          console.log(error);
+        console.log(error);
       });
 
-     // console.log(data);
+      // console.log(data);
     });
   }
 
-  //finding balance of token
-  const balanceCheck = (RPC, currency) => {
-    let web3 = new Web3(new Web3.providers.HttpProvider(RPC));
-    web3.eth.getBalance(address, function (err, result) {
-      if (err) {
-        console.log(err)
-      } else {
-        const x = web3.utils.fromWei(result, "ether") + " " + currency;
-        console.log(x)
-        if (currency === "ETH") {
-          setBalanceETH(x)
-        }
-        if (currency === "MATIC") {
-          setBalanceMATIC(x)
-        }
-        if (currency === "AVAX") {
-          setBalanceAVAX(x)
-        }
-
-      }
-    })
-  }
-
-
-
   return (
     <div className="app">
-      <h1>Cross Chain Wallet</h1>
+      <div>
+        <h1>Cross Chain Wallet</h1>
+      </div>
       <Routes>
         {console.log(authed)}
         <Route path='/' element={authed ? <Login /> : <Signup />} />

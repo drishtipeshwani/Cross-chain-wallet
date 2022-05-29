@@ -19,6 +19,7 @@ class Home extends React.Component {
       totalBalanceUSDC: 0,
       totalBalanceMATIC: 0,
       totalBalanceAVAX: 0,
+      balanceETHGoerli: 0,
       balanceETHKovan: 0,
       balanceETHPolygon: 0,
       balanceETHAvalanche: 0,
@@ -26,30 +27,32 @@ class Home extends React.Component {
       senderInput: '',
       receiverInput: '',
       amountInput: '',
-      demoAddress: '0xE5Bb1Ab7c83a32D900EF7BEF2B7dbE3146502A7b'
+      demoAddress: '0xE5Bb1Ab7c83a32D900EF7BEF2B7dbE3146502A7b',
+      demoAddressPK: '152f8df1657e3aede6b1a079d479bdc2f71da3558a10b123bd76acbb7caeb170'
     }
-    this.web3 = new Web3(new Web3.providers.HttpProvider(networks.Polygon.rpc));
+    this.web3 = new Web3(new Web3.providers.HttpProvider(networks.Goerli.rpc));
   }
 
   updateAmount(e) {
     // Changing state 
-    this.setState({ amountInput: e.target.value });
+    this.setState({ ...this.state, amountInput: e.target.value });
   }
 
   updateSender(e) {
-    this.setState({ senderInput: e.target.value });
+    this.setState({ ...this.state, senderInput: e.target.value });
   }
 
   updateReceiver(e) {
-    this.setState({ receiverInput: e.target.value });
+    this.setState({ ...this.state, receiverInput: e.target.value });
 
   }
 
 
-  componentDidMount() {
-    this.getData(networks.Polygon);
-    this.getData(networks.Avalanche);
-    this.getData(networks.Kovan);
+  async componentDidMount() {
+    await this.getData(networks.Polygon);
+    await this.getData(networks.Avalanche);
+    await this.getData(networks.Kovan);
+    await this.getDataGoerli(networks.Goerli);
     this.wallet = this.web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet')
   }
 
@@ -71,43 +74,33 @@ class Home extends React.Component {
     //Initializing the hyphen sdk
     await hyphen.init();
 
-    let amount = this.web3.utils.toWei('0.2', 'ether');
+    let amount = this.web3.utils.toWei('0.002', 'ether');
     let preTransferStatus = await hyphen.depositManager.preDepositStatus({
-      tokenAddress: networks.Kovan.eth, // Token address on fromChain which needs to be transferred
+      tokenAddress: networks.Goerli.eth, // Token address on fromChain which needs to be transferred
       amount: amount.toString(), // Amount of tokens to be transferred in smallest unit eg wei
-      fromChainId: networks.Kovan.chainId, // Chain id from where tokens needs to be transferred
+      fromChainId: networks.Goerli.chainId, // Chain id from where tokens needs to be transferred
       toChainId: networks.Polygon.chainId, // Chain id where tokens are supposed to be sent
       // userAddress: wallet[0].address // User wallet address who want's to do the transfer
       userAddress: this.state.demoAddress // this is demoAddress
     });
 
-    console.log(preTransferStatus.code, RESPONSE_CODES.OK);
     console.log(preTransferStatus);
 
     if (preTransferStatus.code === RESPONSE_CODES.OK) {
       // ✅ ALL CHECKS PASSED. Proceed to do deposit transaction
     } else if (preTransferStatus.code === RESPONSE_CODES.ALLOWANCE_NOT_GIVEN) {
-      console.log('Allowance not given');
       // ❌ Not enough apporval from user address on LiquidityPoolManager contract on fromChain
-
-      let approveTx = {
-        tokenAddress: networks.Kovan.eth, // Token address on fromChain which needs to be transferred
-        spender: preTransferStatus.depositContract,
-        amount: amount.toString(),
-        // userAddress: wallet[0].address,
-        userAddress: this.state.demoAddress, // this is demoAddress
-        infiniteApproval: true,
-        useBiconomy: true
-      };
-      console.log(approveTx);
-      this.web3.eth.accounts.signTransaction(approveTx, wallet[0].privateKey)
-      console.log(approveTx);
-
-      let approveTxRes = await hyphen.tokens.approveERC20(approveTx);
+      let infiniteApproval = false;
+      let useBiconomy = false;
+      console.log("^^^^^^^^gfdhfjhdjhfjdh^&^^^^^^^^^");
+      let approveTx = await hyphen.tokens.approveERC20(networks.Goerli.eth,
+        '0xE61d38cC9B3eF1d223b177090f3FD02b0B3412e7', amount.toString(),
+        infiniteApproval, useBiconomy,
+        wallet); // !!!NOTE: the previously created wallet is added here
+      console.log("^^^^^^^^gfdhfjhdjhfjdh^&^^^^^^^^^");
       // ⏱Wait for the transaction to confirm, pass a number of blocks to wait as param
-      console.log(approveTxRes);
-
-      await approveTxRes.wait(1);
+      const approveTxWait = await approveTx.wait(2);
+      console.log(approveTxWait + "approveTxWait");
 
       // NOTE: Whenever there is a transaction done via SDK, all responses
       // will be ethers.js compatible with an async wait() function that
@@ -124,6 +117,7 @@ class Home extends React.Component {
     } else {
       // ❌ Any other unexpected error
     }
+
     let amountInput = 0;
     if (this.state.amountInput !== '') {
       amountInput = this.web3.utils.toWei(this.state.amountInput, 'ether');
@@ -139,7 +133,8 @@ class Home extends React.Component {
       senderChain = networks.Avalanche.chainId;
     }
     else if (this.state.senderInput === 'Ethereum') {
-      senderChain = networks.Kovan.chainId;
+      // senderChain = networks.Kovan.chainId;
+      senderChain = networks.Goerli.chainId;
     }
 
     if (this.state.receiverInput === 'Polygon') {
@@ -149,34 +144,68 @@ class Home extends React.Component {
       receiverChain = networks.Avalanche.chainId;
     }
     else if (this.state.receiverInput === 'Ethereum') {
-      receiverChain = networks.Kovan.chainId;
+      // receiverChain = networks.Kovan.chainId;
+      receiverChain = networks.Goerli.chainId;
     }
 
     console.log(senderChain, receiverChain);
+    console.log("#############");
+    console.log(this.state.demoAddress);
+    console.log(networks.Goerli.eth);
+    // console.log(preTransferStatus.depositContract);
+    console.log(senderChain);
+    console.log(receiverChain);
+    console.log("#############");
+
     let tx = {
       mode: 'no-cores',
       gas: 1000000,
-      sender: wallet[0].address,
-      receiver: wallet[0].address, //my account-1
-      tokenAddress: networks.Kovan.eth,
-      depositContractAddress: preTransferStatus.depositContract,
-      amount: amountInput.toString(), //Amount to be transferred. Denoted in smallest unit eg in wei",
+      sender: this.state.demoAddress,
+      receiver: this.state.demoAddress, //my account-1
+      tokenAddress: networks.Goerli.eth,
+      depositContractAddress: '0xE61d38cC9B3eF1d223b177090f3FD02b0B3412e7',
+      amount: amount.toString(), //Amount to be transferred. Denoted in smallest unit eg in wei",
       fromChainId: senderChain, // chainId of fromChain
       toChainId: receiverChain,     // chainId of toChain
-      // useBiconomy: true, // OPTIONAL boolean flag specifying whether to use Biconomy for gas less transaction or not
+      useBiconomy: false, // OPTIONAL boolean flag specifying whether to use Biconomy for gas less transaction or not
       tag: "Dapp specific identifier",
     }
 
     console.log(tx);
-    let signedTx = await this.web3.eth.accounts.signTransaction(tx, wallet[0].privateKey)
+    let signedTx = await this.web3.eth.accounts.signTransaction(tx, this.state.demoAddressPK)
 
     console.log(signedTx);
 
-    let depositTxRes = await hyphen.depositManager.deposit(signedTx);
-    console.log(depositTxRes);
-    // Wait for 1 block confirmation
-    await tx.wait(1);
+    let preDepositTxRes = await hyphen.depositManager.preDepositCheck({
+      tokenAddress: networks.Goerli.eth,
+      amount: amount.toString(),
+      fromChainId: senderChain,
+      toChainId: receiverChain,
+      userAddress: this.state.demoAddress
+    });
 
+    console.log(preDepositTxRes);
+
+    let depositTxRes = await hyphen.depositManager.deposit(tx, wallet);
+    // Wait for 1 block confirmation
+    const depositTxWait = await depositTxRes.wait(1);
+    console.log(depositTxWait + "***************");
+
+    // let depositTx = await hyphen.depositManager.deposit({
+    //   sender: this.state.demoAddress,
+    //   receiver: this.state.demoAddress,
+    //   tokenAddress: networks.Goerli.eth,
+    //   depositContractAddress: '0xE61d38cC9B3eF1d223b177090f3FD02b0B3412e7',
+    //   amount: amount.toString(), //Amount to be transferred. Denoted in smallest unit eg in wei",
+    //   fromChainId: senderChain, // chainId of fromChain
+    //   toChainId: receiverChain,     // chainId of toChain
+    //   useBiconomy: true, // OPTIONAL boolean flag specifying whether to use Biconomy for gas less transaction or not
+    //   tag: "Dapp specific identifier" // Can be any string, emitted from the contract during the deposit call; used for analytics
+    // }, wallet);  // !!!NOTE: the previously created wallet is added here
+
+    // // Wait for 1 block confirmation
+    // const depositTxWait = await depositTx.wait(1);
+    // console.log(depositTxWait + "***************");
   }
 
 
@@ -198,7 +227,8 @@ class Home extends React.Component {
 
     const options = {
       method: 'GET',
-      url: `https://api.covalenthq.com/v1/${network.chainId}/address/${wallet[0].address}/balances_v2/`,
+      // url: `https://api.covalenthq.com/v1/${network.chainId}/address/${wallet[0].address}/balances_v2/`,
+      url: `https://api.covalenthq.com/v1/${network.chainId}/address/${this.state.demoAddress}/balances_v2/`,
       params: {
         key: process.env.REACT_APP_COVALENT_API_KEY
       }
@@ -223,27 +253,63 @@ class Home extends React.Component {
 
       if (symbol == "ETH" || symbol == "WETH" || symbol == "aeth") {
         let stateName = "balanceETH" + network.name;
+        console.log(this.state.totalBalanceETH + "$$$$$$");
         this.setState({
-          totalBalanceETH: this.state.totalBalanceETH + parseFloat(tokenAmounts[symbol]),
+          ...this.state, totalBalanceETH: this.state.totalBalanceETH + parseFloat(tokenAmounts[symbol]),
           [stateName]: this.state[stateName] + parseFloat(tokenAmounts[symbol])
         })
+        console.log(this.state.totalBalanceETH + "*********");
 
       }
       if (symbol === "MATIC") {
         this.setState({
-          totalBalanceMATIC: this.state.totalBalanceMATIC + parseFloat(tokenAmounts[symbol])
+          ...this.state, totalBalanceMATIC: this.state.totalBalanceMATIC + parseFloat(tokenAmounts[symbol])
         })
       }
       if (symbol === "AVAX") {
         this.setState({
-          totalBalanceAVAX: this.state.totalBalanceAVAX + parseFloat(tokenAmounts[symbol])
+          ...this.state, totalBalanceAVAX: this.state.totalBalanceAVAX + parseFloat(tokenAmounts[symbol])
         })
       }
     });
 
 
     this.setState({
-      [network.name]: {
+      ...this.state, [network.name]: {
+        ...tokenAmounts
+      }
+    })
+    // console.log(this.state.totalBalanceETH + "^^^^^^^");
+  }
+
+  getDataGoerli = async (network) => {
+    const {
+      address,
+      totalBalanceETH,
+      balanceETHGoerli
+    } = this.state;
+    console.log(this.state.totalBalanceETH + "^^^^^^^");
+    let wallet = this.web3.eth.accounts.wallet.load(localStorage.getItem('password'), 'user-wallet')
+
+    //finding balance of token in Goerli
+    let tokenAmounts = {};
+    let symbol = "ETH";
+    let web3 = new Web3(new Web3.providers.HttpProvider(network.rpc));
+    console.log(this.state.totalBalanceETH + "@@@@@@@@@@@");
+    const resp = await web3.eth.getBalance(this.state.demoAddress);
+    tokenAmounts[symbol] = web3.utils.fromWei(resp, "ether");
+
+    let stateName = "balanceETH" + network.name;
+    console.log(this.state + "!!!!!!!!!!!!");
+    this.setState({
+      ...this.state, totalBalanceETH: this.state.totalBalanceETH + parseFloat(tokenAmounts[symbol]),
+      [stateName]: this.state[stateName] + parseFloat(tokenAmounts[symbol])
+    })
+
+
+
+    this.setState({
+      ...this.state, [network.name]: {
         ...tokenAmounts
       }
     })
@@ -252,7 +318,8 @@ class Home extends React.Component {
   render() {
     return (
       <Container>
-        {this.wallet && <h5>Account Address - <span>{this.wallet[0].address}</span></h5>}
+        {/* {this.wallet && <h5>Account Address - <span>{this.wallet[0].address}</span></h5>} */}
+        {this.wallet && <h5>Account Address - <span>{this.state.demoAddress}</span></h5>}
         <Row>
           <Col>
             <h1>Balances</h1>

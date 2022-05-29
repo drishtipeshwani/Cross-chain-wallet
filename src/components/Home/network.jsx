@@ -20,3 +20,20 @@ const networks = {
     chainId: 5,
   },
 }
+// const networks = {
+//   Polygon: {
+//     name: "Polygon MainNet",
+//     rpc: polyMainNetRPC,
+//     chainId: 137,
+//   },
+//   Avalanche: {
+//     name: "Avalanche MainNet",
+//     rpc: avaMainNetRPC,
+//     chainId: 43114,
+//   },
+//   Kovan: {
+//     name: "Ethereum Mainnet",
+//     rpc: ethMainNetRPC,
+//     chainId: 1,
+//   }
+// }

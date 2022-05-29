@@ -33,12 +33,12 @@ function Dashboard(props) {
 
   return (
     <div>
-      <h1>Dashboard</h1>
+      <div><h1 className='heading'>Dashboard</h1></div>
       <div className='splitBalance'>
         <h3> Total Balance </h3>
         {balanceAVAX} <br />
         {balanceMATIC}<br />
-        {balanceETH}
+        {balanceETH}<br /> <br />
         <Button variant="primary" onClick={handleSplitBalance} >Get all chains linked</Button>
         {showSplitBalance ? (
           <div>
